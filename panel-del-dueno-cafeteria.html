@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Panel del Dueño — Cafetería</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --roast: #1E130C;
+        --roast-2: #2A1B10;
+        --roast-3: #3A2718;
+        --cream: #F5EBDD;
+        --cream-2: #EADBC4;
+        --amber: #E8A33D;
+        --amber-soft: rgba(232, 163, 61, 0.16);
+        --bg: var(--roast);
+        --surface: #271A10;
+        --surface-2: #31211466;
+        --ink: var(--cream);
+        --ink-dim: #C9B69B;
+        --ink-faint: #9A8266;
+        --line: rgba(245, 235, 221, 0.13);
+        --good: #8FC97A;
+        --warn: #E8A33D;
+        --bad: #E0704F;
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #F5EBDD;
+          --surface: #FFF9EF;
+          --surface-2: rgba(30, 19, 12, 0.05);
+          --ink: #1E130C;
+          --ink-dim: #5C4632;
+          --ink-faint: #8A6F52;
+          --line: rgba(30, 19, 12, 0.14);
+          --good: #4C7A34;
+          --bad: #B44A2A;
+          --amber-soft: rgba(232, 163, 61, 0.22);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Manrope", system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      button { min-height: 2.5rem; font-family: inherit; cursor: pointer; }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 18px 56px; }
+
+      /* ---------- Header ---------- */
+      .topbar {
+        display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px;
+        justify-content: space-between; margin-bottom: 6px;
+      }
+      .title-block h1 {
+        font-family: "Lora", serif; font-weight: 700;
+        font-size: clamp(26px, 4.5vw, 38px); line-height: 1.1; margin: 0 0 6px;
+        letter-spacing: -0.01em;
+      }
+      .title-block p { margin: 0; color: var(--ink-dim); font-size: 14px; max-width: 52ch; }
+      .demo-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        border: 1.5px solid var(--amber); color: var(--amber);
+        background: var(--amber-soft);
+        font-weight: 800; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+        padding: 8px 14px; border-radius: 999px; white-space: nowrap;
+      }
+      .demo-badge::before {
+        content: ""; width: 8px; height: 8px; border-radius: 50%;
+        background: var(--amber); flex: none;
+      }
+      .demo-strip {
+        margin: 14px 0 22px; padding: 11px 16px;
+        border: 1px dashed var(--amber); border-radius: var(--radius);
+        background: var(--amber-soft);
+        font-size: 13.5px; color: var(--ink);
+      }
+      .demo-strip strong { color: var(--amber); letter-spacing: 0.04em; }
+
+      /* ---------- Tabs ---------- */
+      .tabs {
+        display: flex; gap: 6px; padding: 5px;
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: 999px; width: fit-content; max-width: 100%;
+        margin-bottom: 22px;
+      }
+      .tabs button {
+        border: 0; background: transparent; color: var(--ink-dim);
+        font-weight: 700; font-size: 14.5px; padding: 8px 26px; border-radius: 999px;
+        transition: background 0.18s ease, color 0.18s ease;
+      }
+      .tabs button[aria-selected="true"] { background: var(--amber); color: #1E130C; }
+      .tabs button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+      /* ---------- KPI cards ---------- */
+      .kpis {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px;
+      }
+      .kpi {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 18px 18px 15px;
+      }
+      .kpi .label {
+        font-size: 11.5px; font-weight: 800; letter-spacing: 0.13em;
+        text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px;
+        display: flex; align-items: center; gap: 7px;
+      }
+      .kpi .label svg { flex: none; }
+      .kpi .value {
+        font-family: "IBM Plex Mono", monospace; font-weight: 600;
+        font-size: clamp(26px, 3.4vw, 34px); line-height: 1; letter-spacing: -0.02em;
+      }
+      .kpi .delta { margin-top: 9px; font-size: 13px; font-weight: 600; }
+      .kpi .delta.up { color: var(--good); }
+      .kpi .delta.down { color: var(--bad); }
+      .kpi .delta span { color: var(--ink-faint); font-weight: 500; }
+      .kpi.hero { background: var(--amber); border-color: var(--amber); color: #1E130C; }
+      .kpi.hero .label { color: rgba(30, 19, 12, 0.62); }
+      .kpi.hero .delta { color: #4C3A12; }
+      .kpi.hero .delta span { color: rgba(30, 19, 12, 0.6); }
+
+      /* ---------- Panels ---------- */
+      .grid-main {
+        display: grid; grid-template-columns: 1.9fr 1fr; gap: 14px; margin-bottom: 14px;
+      }
+      .grid-lower {
+        display: grid; grid-template-columns: 1.9fr 1fr; gap: 14px;
+      }
+      .panel {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 20px;
+      }
+      .panel h2 {
+        font-family: "Lora", serif; font-size: 19px; font-weight: 600;
+        margin: 0 0 2px;
+      }
+      .panel .sub { color: var(--ink-faint); font-size: 13px; margin: 0 0 16px; }
+      .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+      .panel-head .total {
+        font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--amber); font-weight: 600;
+      }
+
+      /* Chart */
+      .chart-wrap { width: 100%; }
+      svg.chart { display: block; width: 100%; height: auto; }
+      svg.chart .bar { fill: var(--amber); rx: 4; }
+      svg.chart .bar.dim { fill: var(--roast-3); }
+      @media (prefers-color-scheme: light) { svg.chart .bar.dim { fill: #D8C4A4; } }
+      svg.chart .grid-line { stroke: var(--line); stroke-width: 1; }
+      svg.chart text { fill: var(--ink-faint); font-family: "Manrope", sans-serif; font-size: 11px; }
+      svg.chart .val { fill: var(--ink); font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600; }
+      .chart-legend { display: flex; gap: 18px; margin-top: 10px; font-size: 12.5px; color: var(--ink-dim); flex-wrap: wrap; }
+      .chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+      /* Top sellers */
+      .seller { margin-bottom: 15px; }
+      .seller:last-child { margin-bottom: 2px; }
+      .seller .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+      .seller .name { font-weight: 700; font-size: 14.5px; }
+      .seller .name .rank { color: var(--amber); font-family: "IBM Plex Mono", monospace; font-size: 12.5px; margin-right: 7px; }
+      .seller .rev { font-family: "IBM Plex Mono", monospace; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+      .seller .units { color: var(--ink-faint); font-size: 12.5px; margin-top: 1px; }
+      .track { height: 7px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); margin-top: 7px; overflow: hidden; }
+      .track .fill { height: 100%; background: var(--amber); border-radius: 99px; transition: width 0.5s ease; }
+
+      /* Orders */
+      .orders { list-style: none; margin: 0; padding: 0; }
+      .orders li {
+        display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center;
+        padding: 12px 2px; border-bottom: 1px solid var(--line);
+      }
+      .orders li:last-child { border-bottom: 0; padding-bottom: 2px; }
+      .orders .folio { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-faint); }
+      .orders .what { font-weight: 700; font-size: 14.5px; }
+      .orders .meta { color: var(--ink-faint); font-size: 12.5px; margin-top: 1px; }
+      .orders .right { text-align: right; }
+      .orders .amount { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 14.5px; }
+      .chip {
+        display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 800;
+        letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px;
+      }
+      .chip.done { background: rgba(143, 201, 122, 0.16); color: var(--good); }
+      .chip.prep { background: var(--amber-soft); color: var(--amber); }
+      .chip.new { background: rgba(224, 112, 79, 0.16); color: var(--bad); }
+
+      /* Alerts */
+      .alert {
+        display: flex; gap: 12px; padding: 13px 14px; border-radius: 10px;
+        border: 1px solid var(--line); margin-bottom: 10px; background: var(--surface-2);
+      }
+      .alert:last-child { margin-bottom: 0; }
+      .alert .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex: none; }
+      .alert.warn .dot { background: var(--warn); }
+      .alert.bad .dot { background: var(--bad); }
+      .alert.good .dot { background: var(--good); }
+      .alert .t { font-weight: 700; font-size: 14px; }
+      .alert .d { color: var(--ink-dim); font-size: 13px; margin-top: 1px; }
+      .alert .when { color: var(--ink-faint); font-size: 12px; margin-top: 3px; font-family: "IBM Plex Mono", monospace; }
+
+      footer {
+        margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line);
+        color: var(--ink-faint); font-size: 12.5px; display: flex; justify-content: space-between;
+        gap: 12px; flex-wrap: wrap;
+      }
+
+      @media (max-width: 900px) {
+        .kpis { grid-template-columns: repeat(2, 1fr); }
+        .grid-main, .grid-lower { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 460px) {
+        .wrap { padding: 16px 12px 44px; }
+        .tabs { width: 100%; }
+        .tabs button { flex: 1; padding: 8px 6px; }
+        .orders li { grid-template-columns: 52px 1fr auto; gap: 9px; }
+        .panel { padding: 16px 14px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .track .fill, .tabs button { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <header class="topbar">
+        <div class="title-block">
+          <h1>Panel del Dueño</h1>
+          <p>Cafetería — resumen del negocio en un solo lugar: ventas, pedidos, productos estrella y pendientes del día.</p>
+        </div>
+        <span class="demo-badge">Demo · Datos de ejemplo</span>
+      </header>
+
+      <div class="demo-strip" role="note">
+        <strong>Vista de demostración.</strong> Todas las cifras, pedidos y alertas de esta página son datos de ejemplo para mostrar cómo se vería el panel de tu cafetería. No corresponden a ventas reales.
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Periodo">
+        <button role="tab" id="tab-hoy" aria-selected="true" data-period="hoy">Hoy</button>
+        <button role="tab" id="tab-semana" aria-selected="false" data-period="semana">Semana</button>
+        <button role="tab" id="tab-mes" aria-selected="false" data-period="mes">Mes</button>
+      </nav>
+
+      <!-- KPIs -->
+      <section class="kpis" aria-label="Indicadores principales">
+        <article class="kpi hero">
+          <div class="label">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M17 6.5c-.8-1.2-2.6-2-5-2-3 0-5 1.3-5 3.2 0 4.6 10 2.4 10 7 0 1.9-2 3.3-5 3.3-2.4 0-4.2-.8-5-2"/></svg>
+            Ventas
+          </div>
+          <div class="value" id="kpi-ventas">$8,420</div>
+          <div class="delta" id="kpi-ventas-delta"></div>
+        </article>
+        <article class="kpi">
+          <div class="label">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l1.5 13.5a2 2 0 0 1-2 2.5h-11a2 2 0 0 1-2-2.5L6 3Z"/><path d="M9 8h6"/></svg>
+            Pedidos
+          </div>
+          <div class="value" id="kpi-pedidos">96</div>
+          <div class="delta" id="kpi-pedidos-delta"></div>
+        </article>
+        <article class="kpi">
+          <div class="label">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2.5 2.5 0 0 0 0 5v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2.5 2.5 0 0 0 0-5V8Z"/><path d="M13 6v2M13 11v2M13 16v2"/></svg>
+            Ticket promedio
+          </div>
+          <div class="value" id="kpi-ticket">$88</div>
+          <div class="delta" id="kpi-ticket-delta"></div>
+        </article>
+        <article class="kpi">
+          <div class="label">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+            Ganancia
+          </div>
+          <div class="value" id="kpi-ganancia">$5,210</div>
+          <div class="delta" id="kpi-ganancia-delta"></div>
+        </article>
+      </section>
+
+      <!-- Chart + Top sellers -->
+      <div class="grid-main">
+        <section class="panel" aria-labelledby="chart-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="chart-title">Ventas por hora</h2>
+              <p class="sub" id="chart-sub">Cómo se movió la caja durante el día · datos de ejemplo</p>
+            </div>
+            <span class="total" id="chart-total"></span>
+          </div>
+          <div class="chart-wrap" id="chart"></div>
+          <div class="chart-legend">
+            <span><i style="background: var(--amber);"></i>Hora fuerte</span>
+            <span><i style="background: var(--roast-3);"></i>Hora regular</span>
+            <span id="chart-peak"></span>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="top-title">
+          <h2 id="top-title">Más vendidos</h2>
+          <p class="sub" id="top-sub">Productos estrella del día · datos de ejemplo</p>
+          <div id="sellers"></div>
+        </section>
+      </div>
+
+      <!-- Orders + Alerts -->
+      <div class="grid-lower">
+        <section class="panel" aria-labelledby="orders-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="orders-title">Pedidos recientes</h2>
+              <p class="sub">Últimos pedidos registrados · datos de ejemplo</p>
+            </div>
+            <span class="total" id="orders-count"></span>
+          </div>
+          <ul class="orders" id="orders"></ul>
+        </section>
+
+        <section class="panel" aria-labelledby="alerts-title">
+          <h2 id="alerts-title">Alertas</h2>
+          <p class="sub">Lo que necesita tu atención · datos de ejemplo</p>
+          <div id="alerts"></div>
+        </section>
+      </div>
+
+      <footer>
+        <span>Panel del dueño · Cafetería — página independiente, solo para el negocio.</span>
+        <span>Demo con datos de ejemplo · Cifras en pesos mexicanos (MXN)</span>
+      </footer>
+    </div>
+
+    <script>
+      var DATA = {
+        hoy: {
+          kpis: {
+            ventas: 8420, pedidos: 96, ticket: 88, ganancia: 5210,
+            ventasDelta: "+12.4% <span>vs. ayer</span>",
+            pedidosDelta: "+8 <span>vs. ayer</span>",
+            ticketDelta: "+$4 <span>vs. ayer</span>",
+            gananciaDelta: "Margen 61.9% <span>del día</span>"
+          },
+          chartTitle: "Ventas por hora",
+          chartSub: "Cómo se movió la caja durante el día · datos de ejemplo",
+          chartLabels: ["7a", "8a", "9a", "10a", "11a", "12p", "1p", "2p", "3p", "4p", "5p", "6p"],
+          chartValues: [420, 980, 1240, 860, 640, 1120, 980, 540, 380, 460, 520, 280],
+          chartPeak: "Pico del día: 9:00 am con $1,240",
+          topSub: "Productos estrella del día · datos de ejemplo",
+          sellers: [
+            { name: "Capuchino", units: 34, price: 65 },
+            { name: "Latte vainilla", units: 28, price: 72 },
+            { name: "Americano", units: 25, price: 48 },
+            { name: "Croissant de mantequilla", units: 19, price: 42 },
+            { name: "Cold brew", units: 14, price: 70 }
+          ],
+          orders: [
+            { folio: "#0096", what: "2 Capuchino + 1 Croissant", meta: "Mesa 4 · Hace 4 min", amount: 172, status: "prep", statusLabel: "En preparación" },
+            { folio: "#0095", what: "1 Latte vainilla + 1 Brownie", meta: "Para llevar · Hace 11 min", amount: 127, status: "new", statusLabel: "Nuevo" },
+            { folio: "#0094", what: "3 Americano", meta: "Mesa 1 · Hace 18 min", amount: 144, status: "done", statusLabel: "Entregado" },
+            { folio: "#0093", what: "1 Cold brew + 1 Panqué de limón", meta: "Para llevar · Hace 26 min", amount: 118, status: "done", statusLabel: "Entregado" },
+            { folio: "#0092", what: "2 Latte + 2 Croissant", meta: "Mesa 7 · Hace 34 min", amount: 228, status: "done", statusLabel: "Entregado" },
+            { folio: "#0091", what: "1 Espresso doble", meta: "Barra · Hace 41 min", amount: 45, status: "done", statusLabel: "Entregado" }
+          ],
+          alerts: [
+            { level: "bad", t: "Leche de avena por agotarse", d: "Quedan 2 cartones. Al ritmo de hoy se acaba mañana al mediodía.", when: "Inventario · hace 20 min" },
+            { level: "warn", t: "Hora pico a las 9:00 am", d: "Hoy se juntaron 18 pedidos en una hora. Vale la pena un barista extra en ese turno.", when: "Patrón del día" },
+            { level: "good", t: "El capuchino va al alza", d: "Es el producto más vendido por tercer día seguido: 34 piezas hoy.", when: "Tendencia positiva" }
+          ]
+        },
+        semana: {
+          kpis: {
+            ventas: 52340, pedidos: 612, ticket: 86, ganancia: 32480,
+            ventasDelta: "+9.1% <span>vs. semana pasada</span>",
+            pedidosDelta: "+47 <span>vs. semana pasada</span>",
+            ticketDelta: "-$2 <span>vs. semana pasada</span>",
+            gananciaDelta: "Margen 62.1% <span>de la semana</span>"
+          },
+          chartTitle: "Ventas por día",
+          chartSub: "Total vendido cada día de la semana · datos de ejemplo",
+          chartLabels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+          chartValues: [6980, 7240, 6810, 7560, 8420, 9150, 6180],
+          chartPeak: "Mejor día: sábado con $9,150",
+          topSub: "Productos estrella de la semana · datos de ejemplo",
+          sellers: [
+            { name: "Capuchino", units: 218, price: 65 },
+            { name: "Americano", units: 176, price: 48 },
+            { name: "Latte vainilla", units: 164, price: 72 },
+            { name: "Croissant de mantequilla", units: 121, price: 42 },
+            { name: "Cold brew", units: 96, price: 70 }
+          ],
+          orders: [
+            { folio: "#0612", what: "2 Capuchino + 1 Croissant", meta: "Mesa 4 · Hoy, 12:40 pm", amount: 172, status: "prep", statusLabel: "En preparación" },
+            { folio: "#0611", what: "1 Latte vainilla + 1 Brownie", meta: "Para llevar · Hoy, 12:29 pm", amount: 127, status: "new", statusLabel: "Nuevo" },
+            { folio: "#0610", what: "4 Americano + 2 Panqué", meta: "Mesa 9 · Hoy, 11:58 am", amount: 288, status: "done", statusLabel: "Entregado" },
+            { folio: "#0609", what: "1 Cold brew", meta: "Para llevar · Hoy, 11:41 am", amount: 70, status: "done", statusLabel: "Entregado" },
+            { folio: "#0608", what: "2 Latte + 1 Croissant", meta: "Mesa 2 · Hoy, 11:15 am", amount: 186, status: "done", statusLabel: "Entregado" },
+            { folio: "#0607", what: "1 Capuchino + 1 Espresso", meta: "Barra · Hoy, 10:52 am", amount: 110, status: "done", statusLabel: "Entregado" }
+          ],
+          alerts: [
+            { level: "bad", t: "Leche de avena por agotarse", d: "Quedan 2 cartones. Con el consumo de la semana alcanza hasta el jueves.", when: "Inventario · hoy" },
+            { level: "warn", t: "El domingo bajó la venta", d: "$6,180 contra $9,150 del sábado. Revisa si conviene cerrar una hora antes.", when: "Comparativo semanal" },
+            { level: "good", t: "Semana arriba de la pasada", d: "Ventas +9.1% y 47 pedidos más que la semana anterior.", when: "Resumen semanal" }
+          ]
+        },
+        mes: {
+          kpis: {
+            ventas: 218650, pedidos: 2540, ticket: 86, ganancia: 135900,
+            ventasDelta: "+14.6% <span>vs. mes pasado</span>",
+            pedidosDelta: "+312 <span>vs. mes pasado</span>",
+            ticketDelta: "+$1 <span>vs. mes pasado</span>",
+            gananciaDelta: "Margen 62.2% <span>del mes</span>"
+          },
+          chartTitle: "Ventas por semana",
+          chartSub: "Total vendido en cada semana del mes · datos de ejemplo",
+          chartLabels: ["Sem 1", "Sem 2", "Sem 3", "Sem 4"],
+          chartValues: [48900, 52340, 55120, 62290],
+          chartPeak: "Mejor semana: la 4 con $62,290",
+          topSub: "Productos estrella del mes · datos de ejemplo",
+          sellers: [
+            { name: "Capuchino", units: 905, price: 65 },
+            { name: "Latte vainilla", units: 688, price: 72 },
+            { name: "Americano", units: 731, price: 48 },
+            { name: "Croissant de mantequilla", units: 502, price: 42 },
+            { name: "Cold brew", units: 388, price: 70 }
+          ],
+          orders: [
+            { folio: "#2540", what: "2 Capuchino + 1 Croissant", meta: "Mesa 4 · Hoy, 12:40 pm", amount: 172, status: "prep", statusLabel: "En preparación" },
+            { folio: "#2539", what: "1 Latte vainilla + 1 Brownie", meta: "Para llevar · Hoy, 12:29 pm", amount: 127, status: "new", statusLabel: "Nuevo" },
+            { folio: "#2538", what: "4 Americano + 2 Panqué", meta: "Mesa 9 · Hoy, 11:58 am", amount: 288, status: "done", statusLabel: "Entregado" },
+            { folio: "#2537", what: "1 Cold brew", meta: "Para llevar · Hoy, 11:41 am", amount: 70, status: "done", statusLabel: "Entregado" },
+            { folio: "#2536", what: "2 Latte + 1 Croissant", meta: "Mesa 2 · Hoy, 11:15 am", amount: 186, status: "done", statusLabel: "Entregado" },
+            { folio: "#2535", what: "1 Capuchino + 1 Espresso", meta: "Barra · Hoy, 10:52 am", amount: 110, status: "done", statusLabel: "Entregado" }
+          ],
+          alerts: [
+            { level: "warn", t: "Granos de café: pedir esta semana", d: "El consumo del mes fue de 38 kg. Con el stock actual alcanza unos 9 días.", when: "Inventario · hoy" },
+            { level: "good", t: "Mes récord de la cafetería", d: "$218,650 en ventas, 14.6% arriba del mes pasado.", when: "Resumen mensual" },
+            { level: "good", t: "El cold brew creció 22%", d: "Pasó de 318 a 388 piezas en el mes. Buen candidato para combo con panqué.", when: "Tendencia mensual" }
+          ]
+        }
+      };
+
+      function money(n) { return "$" + n.toLocaleString("es-MX"); }
+
+      function buildChart(labels, values) {
+        var W = 720, H = 260, padL = 8, padR = 8, padT = 26, padB = 30;
+        var max = Math.max.apply(null, values);
+        var niceMax = Math.ceil(max / 500) * 500;
+        var innerW = W - padL - padR, innerH = H - padT - padB;
+        var slot = innerW / values.length;
+        var barW = Math.min(46, slot * 0.58);
+        var maxIdx = values.indexOf(max);
+        var s = "";
+        // gridlines (4)
+        for (var g = 0; g <= 4; g++) {
+          var gy = padT + innerH - (innerH * g / 4);
+          s += '<line class="grid-line" x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '"/>';
+        }
+        for (var i = 0; i < values.length; i++) {
+          var v = values[i];
+          var h = Math.max(3, innerH * v / niceMax);
+          var x = padL + slot * i + (slot - barW) / 2;
+          var y = padT + innerH - h;
+          var cls = (i === maxIdx) ? "bar" : "bar dim";
+          s += '<rect class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="4"/>';
+          s += '<text class="val" x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 7).toFixed(1) + '" text-anchor="middle">' + money(v) + '</text>';
+          s += '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + labels[i] + '</text>';
+        }
+        return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfica de ventas del periodo">' + s + "</svg>";
+      }
+
+      function render(period) {
+        var d = DATA[period];
+        document.getElementById("kpi-ventas").textContent = money(d.kpis.ventas);
+        document.getElementById("kpi-pedidos").textContent = d.kpis.pedidos.toLocaleString("es-MX");
+        document.getElementById("kpi-ticket").textContent = money(d.kpis.ticket);
+        document.getElementById("kpi-ganancia").textContent = money(d.kpis.ganancia);
+        document.getElementById("kpi-ventas-delta").innerHTML = d.kpis.ventasDelta;
+        document.getElementById("kpi-pedidos-delta").innerHTML = d.kpis.pedidosDelta;
+        document.getElementById("kpi-ticket-delta").innerHTML = d.kpis.ticketDelta;
+        document.getElementById("kpi-ganancia-delta").innerHTML = d.kpis.gananciaDelta;
+        // delta colors: keep neutral except hero handled by CSS; mark up/down
+        document.getElementById("kpi-pedidos-delta").className = "delta up";
+        document.getElementById("kpi-ticket-delta").className = "delta " + (d.kpis.ticketDelta.indexOf("-") === 0 ? "down" : "up");
+        document.getElementById("kpi-ganancia-delta").className = "delta up";
+
+        document.getElementById("chart-title").textContent = d.chartTitle;
+        document.getElementById("chart-sub").textContent = d.chartSub;
+        document.getElementById("chart-total").textContent = "Total: " + money(d.kpis.ventas);
+        document.getElementById("chart").innerHTML = buildChart(d.chartLabels, d.chartValues);
+        document.getElementById("chart-peak").textContent = d.chartPeak;
+
+        document.getElementById("top-sub").textContent = d.topSub;
+        var sorted = d.sellers.slice().sort(function (a, b) { return (b.units * b.price) - (a.units * a.price); });
+        var maxRev = sorted[0].units * sorted[0].price;
+        var sh = "";
+        sorted.forEach(function (p, idx) {
+          var rev = p.units * p.price;
+          sh += '<div class="seller"><div class="row"><span class="name"><span class="rank">' + (idx + 1) + '</span>' + p.name + '</span>' +
+            '<span class="rev">' + money(rev) + '</span></div>' +
+            '<div class="units">' + p.units.toLocaleString("es-MX") + ' piezas vendidas · ' + money(p.price) + ' c/u</div>' +
+            '<div class="track"><div class="fill" style="width:' + Math.round(rev / maxRev * 100) + '%"></div></div></div>';
+        });
+        document.getElementById("sellers").innerHTML = sh;
+
+        document.getElementById("orders-count").textContent = d.orders.length + " recientes";
+        var oh = "";
+        d.orders.forEach(function (o) {
+          oh += '<li><span class="folio">' + o.folio + '</span>' +
+            '<span><span class="what">' + o.what + '</span><div class="meta">' + o.meta + '</div></span>' +
+            '<span class="right"><span class="amount">' + money(o.amount) + '</span><br/><span class="chip ' + o.status + '">' + o.statusLabel + '</span></span></li>';
+        });
+        document.getElementById("orders").innerHTML = oh;
+
+        var ah = "";
+        d.alerts.forEach(function (a) {
+          ah += '<div class="alert ' + a.level + '"><span class="dot"></span><div><div class="t">' + a.t + '</div><div class="d">' + a.d + '</div><div class="when">' + a.when + '</div></div></div>';
+        });
+        document.getElementById("alerts").innerHTML = ah;
+      }
+
+      var tabs = document.querySelectorAll(".tabs button");
+      tabs.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          tabs.forEach(function (b) { b.setAttribute("aria-selected", "false"); });
+          btn.setAttribute("aria-selected", "true");
+          render(btn.getAttribute("data-period"));
+        });
+      });
+
+      render("hoy");
+    </script>
+  </body>
+</html>
